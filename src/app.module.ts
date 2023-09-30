@@ -1,27 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user';
-// import { ConfigModule } from '@nestjs/config';
-// import dbConfig from 'src/config/db.config';
+import { LoggerMiddleware } from './logger/logger.middleware';
+import { DatabaseModule } from './database/database.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [
-    // ConfigModule.forRoot({
-    //   isGlobal: true,
-    //   load: [dbConfig],
-    //   envFilePath: [`.env.${process.env.NODE_ENV}`],
-    // }),
-    // TypeOrmModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     ...(await configService.get('database')),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
-    UserModule,
-  ],
+  imports: [DatabaseModule, UserModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('');
+  }
+}

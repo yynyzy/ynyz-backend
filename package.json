@@ -17,21 +17,19 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "typeorm:dev": "NODE_ENV=dev ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "typeorm:migration:generate": "npm run typeorm -- migration:generate -n",
-    "typeorm:migration:generate:dev": "npm run typeorm:dev -- migration:generate -n",
-    "typeorm:migration:run": "npm run typeorm -- migration:run",
-    "typeorm:migration:run:dev": "npm run typeorm:dev -- migration:run"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/sequelize": "^10.0.0",
+    "mysql2": "^3.6.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sequelize": "^6.33.0",
+    "sequelize-typescript": "^2.1.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -40,6 +38,7 @@
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/sequelize": "^4.28.16",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
