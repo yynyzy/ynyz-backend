@@ -12,7 +12,6 @@ export class HttpExceptionFilter<T> implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    // const status = exception.getStatus();
     let status = HttpStatus.INTERNAL_SERVER_ERROR; // 默认状态码
 
     if (exception instanceof Error) {
