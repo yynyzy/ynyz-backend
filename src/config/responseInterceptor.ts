@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CustomResponse } from '../Interface/customResponse.model';
+import { CustomResponse } from '../Interface/customResponse';
 
 /**
  * 响应格式为
