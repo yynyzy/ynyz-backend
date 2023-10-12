@@ -4,7 +4,7 @@ import {
   Account_Register_Dto,
   Account_Register_Response,
 } from './interface/account';
-import { User } from 'src/database/user/user.model';
+import { User } from 'src/entities/user.entity';
 
 @Controller('account')
 export class AccountController {

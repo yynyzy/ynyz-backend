@@ -1,9 +1,9 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
-import { HashPasswordMiddleware } from 'src/middleWares/hashPassword.middleware';
+import { HashPasswordMiddleware } from 'src/core/middleWares/hashPassword.middleware';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { User } from 'src/database/user/user.model';
+import { User } from 'src/entities/user.entity';
 
 @Module({
   imports: [SequelizeModule.forFeature([User])],

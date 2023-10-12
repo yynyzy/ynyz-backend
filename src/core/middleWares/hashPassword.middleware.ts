@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Crypto } from '../utils/index';
+import { Crypto } from '../../common/utils/index';
 
 @Injectable()
 export class HashPasswordMiddleware implements NestMiddleware {
