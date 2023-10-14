@@ -20,6 +20,9 @@ export class User extends Model<User> {
   password: string;
 
   @Column
+  salt: string;
+
+  @Column
   email: string;
 
   @Column
@@ -32,5 +35,5 @@ export class User extends Model<User> {
   avatar: string;
 
   @Column
-  deleted: number;
+  isDeleted: boolean;
 }
