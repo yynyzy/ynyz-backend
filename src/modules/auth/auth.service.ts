@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from 'src/entities/user.entity';
-import { Account_Register_Dto } from './interface/account';
+import { Auth_Register_Interface } from './interface/auth';
 
 @Injectable()
-export class AccountService {
+export class AuthService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
   ) {}
 
-  async register(registerData: Account_Register_Dto): Promise<User> {
-    const account = await this.userModel.create(registerData);
-    console.log('account', account);
-    return account;
+  async register(registerData: Auth_Register_Interface): Promise<User> {
+    const user = await this.userModel.create(registerData);
+    return user;
   }
 
   async findByUsername(username: string): Promise<User> {
-    const account = await this.userModel.findOne({
+    const user = await this.userModel.findOne({
       where: { username },
     });
-    return account;
+    return user;
   }
 
   login() {

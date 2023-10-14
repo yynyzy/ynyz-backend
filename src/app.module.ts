@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { LoggerMiddleware } from './core/middleWares/logger.middleware';
 import { DatabaseModule } from './entities/index.module';
 import { UserModule } from './modules/user/user.module';
-import { AccountModule } from './modules/account/account.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { AccountModule } from './modules/account/account.module';
     }),
     DatabaseModule,
     UserModule,
-    AccountModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
