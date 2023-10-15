@@ -6,7 +6,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from 'src/entities/user.entity';
-// import { LocalStrategy } from './local.strategy';
 
 @Module({
   imports: [

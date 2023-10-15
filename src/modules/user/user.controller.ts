@@ -1,13 +1,14 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Request, Get, Post, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/entities/user.entity';
 // import { Role } from 'src/common/decorators/role.decorator';
-import {
-  Login_Request,
-  Register_And_Login_Response,
-  Register_Request,
-} from './interface/user';
 import { AuthService } from '../auth/auth.service';
+import { Public } from 'src/common/decorators/public.decorator';
+import {
+  ILogin_Body,
+  IRegisterAndLogin_Response,
+  IRegister_Body,
+} from './interface/user';
 
 @Controller('user')
 export class UserController {
@@ -17,12 +18,13 @@ export class UserController {
   ) {}
 
   // 注册登陆接口返回值
-  private Register_And_Login_Res: Register_And_Login_Response;
+  private Register_And_Login_Res: IRegisterAndLogin_Response;
 
+  @Public()
   @Post('register')
   async register(
-    @Body() registerData: Register_Request,
-  ): Promise<Register_And_Login_Response> {
+    @Body() registerData: IRegister_Body,
+  ): Promise<IRegisterAndLogin_Response> {
     this.Register_And_Login_Res = {
       status: 'fail',
     };
@@ -63,14 +65,16 @@ export class UserController {
     return this.Register_And_Login_Res;
   }
 
+  @Public()
   @Post('login')
-  async login(@Body() loginData: Login_Request) {
-    console.log('用户请求登录: login');
+  async login(@Body() loginData: ILogin_Body) {
     this.Register_And_Login_Res = {
       status: 'fail',
     };
     try {
-      const user = await this.userService.findByUsername(loginData.username);
+      const user: User = await this.userService.findByUsername(
+        loginData.username,
+      );
       if (user) {
         const isUserPasswordCorrect: boolean =
           this.authService.validateUserPassword({
@@ -108,7 +112,12 @@ export class UserController {
   }
 
   @Get('search')
-  async findByUsername(@Query('username') username: string): Promise<User> {
+  async findByUsername(
+    @Request() req,
+    @Query('username') username: string,
+  ): Promise<User> {
+    console.log('req', req.user);
+
     return await this.userService.findByUsername(username);
   }
 }

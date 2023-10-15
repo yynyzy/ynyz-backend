@@ -7,17 +7,17 @@ type Register_And_Login_Response_User = {
   // status: number;
 };
 
-export type Register_Request = {
+export type IRegister_Body = {
   username: string;
   password: string;
 };
 
-export type Login_Request = {
+export type ILogin_Body = {
   username: string;
   password: string;
 };
 
-export type Register_And_Login_Response = {
+export type IRegisterAndLogin_Response = {
   status: 'success' | 'fail';
   message?: string;
   token?: string;

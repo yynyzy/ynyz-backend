@@ -1,4 +1,4 @@
-export type JWT_Certificate_Res = {
+export type JWT_Certificate_Response = {
   status: 'success' | 'fail';
   token?: string;
 };
