@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from 'src/entities/user.entity';
-import { Register_Request_Interface } from './interface/user';
+import { Register_Request } from './interface/user';
 
 @Injectable()
 export class UserService {
@@ -10,7 +10,7 @@ export class UserService {
     private userModel: typeof User,
   ) {}
 
-  async register(registerData: Register_Request_Interface): Promise<User> {
+  async register(registerData: Register_Request): Promise<User> {
     const user = await this.userModel.create(registerData);
     return user;
   }
@@ -20,9 +20,5 @@ export class UserService {
       where: { username },
     });
     return user;
-  }
-
-  login() {
-    return this.userModel.findAll();
   }
 }

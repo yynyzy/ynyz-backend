@@ -1,5 +1,6 @@
 export const DEV_CONFIG = {
   port: 3000,
+  jwtSecret: 'yanzhiyuan',
   database: {
     DB_DIALECT: 'mysql',
     DB_HOST: '127.0.0.1',
@@ -12,6 +13,7 @@ export const DEV_CONFIG = {
 
 export const PROD_CONFIG = {
   port: 3001,
+  jwtSecret: 'yanzhiyuan',
   database: {
     DB_DIALECT: 'mysql',
     DB_HOST: '127.0.0.1',

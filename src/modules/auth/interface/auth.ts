@@ -1,10 +1,10 @@
-export type Auth_Register_Request_Interface = {
-  username: string;
-  password: string;
+export type JWT_Certificate_Res = {
+  status: 'success' | 'fail';
+  token?: string;
 };
 
-export type Auth_Register_Response_Interface = {
-  status: 'success' | 'fail';
-  userId: number;
-  message: string;
+export type validate_User_Password_Params = {
+  password: string;
+  hashedPassword: string;
+  salt: string;
 };

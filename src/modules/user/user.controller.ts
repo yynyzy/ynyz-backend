@@ -3,9 +3,9 @@ import { UserService } from './user.service';
 import { User } from 'src/entities/user.entity';
 // import { Role } from 'src/common/decorators/role.decorator';
 import {
-  Login_Request_Interface,
-  Register_Request_Interface,
-  Register_Response_Interface,
+  Login_Request,
+  Register_And_Login_Response,
+  Register_Request,
 } from './interface/user';
 import { AuthService } from '../auth/auth.service';
 
@@ -16,79 +16,95 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
 
-  private R_Response: Register_Response_Interface;
+  // 注册登陆接口返回值
+  private Register_And_Login_Res: Register_And_Login_Response;
 
   @Post('register')
   async register(
-    @Body() registerData: Register_Request_Interface,
-  ): Promise<Register_Response_Interface> {
-    this.R_Response = {
+    @Body() registerData: Register_Request,
+  ): Promise<Register_And_Login_Response> {
+    this.Register_And_Login_Res = {
       status: 'fail',
-      message: '',
     };
     if (registerData.username) {
       try {
         const user: User = await this.userService.findByUsername(
           registerData.username,
         );
-        console.log('user1111111', user);
 
         if (user) {
-          this.R_Response.message = '用户已存在';
+          this.Register_And_Login_Res.message = '用户已存在';
         } else {
           try {
             const user: User = await this.userService.register(registerData);
             console.log('user', user);
             if (user) {
               const authResult = await this.authService.certificate(user);
-              if (authResult.status === 0) {
-                this.R_Response.status = 'success';
-                this.R_Response.message = '用户注册成功';
-                this.R_Response.token = authResult.token;
+              if (authResult.status === 'success') {
+                this.Register_And_Login_Res.status = 'success';
+                this.Register_And_Login_Res.message = '用户注册成功';
+                this.Register_And_Login_Res.token = authResult.token;
               } else {
-                this.R_Response.message = authResult.message;
+                this.Register_And_Login_Res.message = '用户注册失败';
               }
             } else {
-              this.R_Response.message = '用户注册失败';
+              this.Register_And_Login_Res.message = '用户注册失败';
             }
           } catch (error) {
-            this.R_Response.message = error;
-            return this.R_Response;
+            this.Register_And_Login_Res.message = error;
           }
         }
-        return this.R_Response;
       } catch (error) {
-        this.R_Response.message = error;
-        return this.R_Response;
+        this.Register_And_Login_Res.message = error;
       }
+    } else {
+      this.Register_And_Login_Res;
     }
+    return this.Register_And_Login_Res;
   }
 
   @Post('login')
-  async login(@Body() loginData: Login_Request_Interface) {
-    console.log('JWT验证 - Step 1: 用户请求登录');
-    const user = await this.userService.findByUsername(loginData.username);
-    if (user) {
-      const authResult = await this.authService.validateUser(
-        user.username,
-        user.salt,
-      );
-      // const authResult = await this.authService.verifyToken()
-      switch (authResult.code) {
-        case 1:
-          return this.authService.certificate(authResult.user);
-        case 2:
-          return {
-            code: 1,
-            msg: authResult.message,
-          };
-        default:
-      }
-    }
-    return {
-      code: 600,
-      msg: `查无此人`,
+  async login(@Body() loginData: Login_Request) {
+    console.log('用户请求登录: login');
+    this.Register_And_Login_Res = {
+      status: 'fail',
     };
+    try {
+      const user = await this.userService.findByUsername(loginData.username);
+      if (user) {
+        const isUserPasswordCorrect: boolean =
+          this.authService.validateUserPassword({
+            password: loginData.password,
+            hashedPassword: user.password,
+            salt: user.salt,
+          });
+        // const authResult = await this.authService.verifyToken()
+        if (isUserPasswordCorrect) {
+          const certificateData = this.authService.certificate(user);
+          if (certificateData.status === 'success') {
+            this.Register_And_Login_Res.status = 'success';
+            this.Register_And_Login_Res.message = '用户登陆成功';
+            this.Register_And_Login_Res.token = certificateData.token;
+            this.Register_And_Login_Res.user = {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              phone: user.phone,
+              avatar: user.avatar,
+            };
+          } else {
+            this.Register_And_Login_Res.message = '用户登陆失败';
+          }
+        } else {
+          this.Register_And_Login_Res.message = '用户密码不正确';
+        }
+      } else {
+        this.Register_And_Login_Res.message = '无当前用户名角色';
+      }
+    } catch (error) {
+      this.Register_And_Login_Res.message = error;
+    }
+    return this.Register_And_Login_Res;
   }
 
   @Get('search')

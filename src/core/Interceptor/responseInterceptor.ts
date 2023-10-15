@@ -27,7 +27,7 @@ export class ResponseInterceptor<T>
   ): Observable<CustomResponse<T>> {
     return next.handle().pipe(
       map((data) => {
-        // 检查是否已经包含了 code 和 data 属性
+        // 如何data包含了 statusCode，就直接返回它
         if (
           typeof data === 'object' &&
           data.hasOwnProperty('statusCode') &&
@@ -35,7 +35,7 @@ export class ResponseInterceptor<T>
         ) {
           return data; // 如果已经包含了 code 和 data 属性，直接返回
         }
-        // 创建自定义响应对象
+        // 创建自定义响应对象默认 statusCode 为 200
         return new CustomResponse<T>(this.defaultCode, data);
       }),
     );

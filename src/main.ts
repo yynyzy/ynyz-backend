@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './core/filter/httpException.filter';
 import { ResponseInterceptor } from './core/Interceptor/responseInterceptor';
 import { AuthGuard } from './core/guards/auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,9 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   // 全局守卫
   app.useGlobalGuards(new AuthGuard(new Reflector()));
-  await app.listen(3000);
+
+  const configService = app.get(ConfigService);
+  const port = configService.get('port') || 3000;
+  await app.listen(port);
 }
 bootstrap();
