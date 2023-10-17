@@ -9,6 +9,7 @@ import {
   IRegisterAndLogin_Response,
   IRegister_Body,
 } from './interface/user';
+import { ExceptionConstant } from './constant/exceptionConstant';
 
 @Controller('user')
 export class UserController {
@@ -20,6 +21,10 @@ export class UserController {
   // 注册登陆接口返回值
   private Register_And_Login_Res: IRegisterAndLogin_Response;
 
+  /**
+   * @用户注册接口
+   * @param IRegister_Body
+   */
   @Public()
   @Post('register')
   async register(
@@ -35,7 +40,8 @@ export class UserController {
         );
 
         if (user) {
-          this.Register_And_Login_Res.message = '用户已存在';
+          this.Register_And_Login_Res.message =
+            ExceptionConstant.USER_ALREADY_EXISTS;
         } else {
           try {
             const user: User = await this.userService.register(registerData);
@@ -44,13 +50,14 @@ export class UserController {
               const authResult = await this.authService.certificate(user);
               if (authResult.status === 'success') {
                 this.Register_And_Login_Res.status = 'success';
-                this.Register_And_Login_Res.message = '用户注册成功';
                 this.Register_And_Login_Res.token = authResult.token;
               } else {
-                this.Register_And_Login_Res.message = '用户注册失败';
+                this.Register_And_Login_Res.message =
+                  ExceptionConstant.FAILED_REGISTER;
               }
             } else {
-              this.Register_And_Login_Res.message = '用户注册失败';
+              this.Register_And_Login_Res.message =
+                ExceptionConstant.FAILED_REGISTER;
             }
           } catch (error) {
             this.Register_And_Login_Res.message = error;
@@ -65,6 +72,10 @@ export class UserController {
     return this.Register_And_Login_Res;
   }
 
+  /**
+   * @用户登陆接口
+   * @param ILogin_Body
+   */
   @Public()
   @Post('login')
   async login(@Body() loginData: ILogin_Body) {
@@ -87,7 +98,6 @@ export class UserController {
           const certificateData = this.authService.certificate(user);
           if (certificateData.status === 'success') {
             this.Register_And_Login_Res.status = 'success';
-            this.Register_And_Login_Res.message = '用户登陆成功';
             this.Register_And_Login_Res.token = certificateData.token;
             this.Register_And_Login_Res.user = {
               id: user.id,
@@ -97,13 +107,16 @@ export class UserController {
               avatar: user.avatar,
             };
           } else {
-            this.Register_And_Login_Res.message = '用户登陆失败';
+            this.Register_And_Login_Res.message =
+              ExceptionConstant.FAILED_LOGIN;
           }
         } else {
-          this.Register_And_Login_Res.message = '用户密码不正确';
+          this.Register_And_Login_Res.message =
+            ExceptionConstant.INCORRECT_PASSWORD;
         }
       } else {
-        this.Register_And_Login_Res.message = '无当前用户名角色';
+        this.Register_And_Login_Res.message =
+          ExceptionConstant.NO_USERNAME_ROLE;
       }
     } catch (error) {
       this.Register_And_Login_Res.message = error;
