@@ -1,3 +1,5 @@
+import { RESPONSE_STATUS } from 'src/common/constant/constant';
+
 type Register_And_Login_Response_User = {
   id: number;
   username: string;
@@ -18,7 +20,7 @@ export type ILogin_Body = {
 };
 
 export type IRegisterAndLogin_Response = {
-  status: 'success' | 'fail';
+  status: RESPONSE_STATUS;
   message?: string;
   token?: string;
   user?: Register_And_Login_Response_User;

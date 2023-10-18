@@ -1,4 +1,13 @@
-import { Body, Controller, Request, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Request,
+  Get,
+  Post,
+  Query,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/entities/user.entity';
 // import { Role } from 'src/common/decorators/role.decorator';
@@ -10,6 +19,7 @@ import {
   IRegister_Body,
 } from './interface/user';
 import { ExceptionConstant } from './constant/exceptionConstant';
+import { RESPONSE_STATUS } from 'src/common/constant/constant';
 
 @Controller('user')
 export class UserController {
@@ -31,7 +41,7 @@ export class UserController {
     @Body() registerData: IRegister_Body,
   ): Promise<IRegisterAndLogin_Response> {
     this.Register_And_Login_Res = {
-      status: 'fail',
+      status: RESPONSE_STATUS.FAIL,
     };
     if (registerData.username) {
       try {
@@ -45,11 +55,10 @@ export class UserController {
         } else {
           try {
             const user: User = await this.userService.register(registerData);
-            console.log('user', user);
             if (user) {
               const authResult = await this.authService.certificate(user);
-              if (authResult.status === 'success') {
-                this.Register_And_Login_Res.status = 'success';
+              if (authResult.status === RESPONSE_STATUS.SUCCESS) {
+                this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
                 this.Register_And_Login_Res.token = authResult.token;
               } else {
                 this.Register_And_Login_Res.message =
@@ -60,14 +69,14 @@ export class UserController {
                 ExceptionConstant.FAILED_REGISTER;
             }
           } catch (error) {
-            this.Register_And_Login_Res.message = error;
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
           }
         }
       } catch (error) {
-        this.Register_And_Login_Res.message = error;
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
     } else {
-      this.Register_And_Login_Res;
+      this.Register_And_Login_Res.message = ExceptionConstant.ERROR_PARAMS;
     }
     return this.Register_And_Login_Res;
   }
@@ -80,7 +89,7 @@ export class UserController {
   @Post('login')
   async login(@Body() loginData: ILogin_Body) {
     this.Register_And_Login_Res = {
-      status: 'fail',
+      status: RESPONSE_STATUS.FAIL,
     };
     try {
       const user: User = await this.userService.findByUsername(
@@ -96,8 +105,8 @@ export class UserController {
         // const authResult = await this.authService.verifyToken()
         if (isUserPasswordCorrect) {
           const certificateData = this.authService.certificate(user);
-          if (certificateData.status === 'success') {
-            this.Register_And_Login_Res.status = 'success';
+          if (certificateData.status === RESPONSE_STATUS.SUCCESS) {
+            this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
             this.Register_And_Login_Res.token = certificateData.token;
             this.Register_And_Login_Res.user = {
               id: user.id,
@@ -119,7 +128,7 @@ export class UserController {
           ExceptionConstant.NO_USERNAME_ROLE;
       }
     } catch (error) {
-      this.Register_And_Login_Res.message = error;
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
     return this.Register_And_Login_Res;
   }
@@ -129,8 +138,10 @@ export class UserController {
     @Request() req,
     @Query('username') username: string,
   ): Promise<User> {
-    console.log('req', req.user);
-
-    return await this.userService.findByUsername(username);
+    try {
+      return await this.userService.findByUsername(username);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

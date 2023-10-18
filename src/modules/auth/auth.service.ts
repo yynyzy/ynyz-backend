@@ -7,6 +7,7 @@ import {
   validate_User_Password_Params,
 } from './interface/auth';
 import { InjectModel } from '@nestjs/sequelize';
+import { RESPONSE_STATUS } from 'src/common/constant/constant';
 
 @Injectable()
 export class AuthService {
@@ -37,9 +38,8 @@ export class AuthService {
    * @param user
    */
   certificate(user: User): JWT_Certificate_Response {
-    console.log('处理 jwt 签证: certificate');
     this.jwt_certificate_res = {
-      status: 'fail',
+      status: RESPONSE_STATUS.FAIL,
     };
     const payload = {
       id: user.id,
@@ -48,7 +48,7 @@ export class AuthService {
     };
     try {
       const token: string = this.jwtService.sign(payload);
-      this.jwt_certificate_res.status = 'success';
+      this.jwt_certificate_res.status = RESPONSE_STATUS.SUCCESS;
       this.jwt_certificate_res.token = token;
     } catch (error) {
       console.error(error);

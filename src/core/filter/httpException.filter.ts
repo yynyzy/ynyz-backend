@@ -2,26 +2,24 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
-  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Response, Request } from 'express';
+import { HttpStatusCode } from 'src/common/constant/constant';
 
 @Catch()
-export class HttpExceptionFilter<T> implements ExceptionFilter {
-  catch(exception: T, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx: HttpArgumentsHost = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    let status = HttpStatus.INTERNAL_SERVER_ERROR; // 默认状态码
-
-    if (exception instanceof Error) {
-      // 如果异常是一个 Error 对象，尝试从它的属性中获取状态码
-      status = (exception as any).status || HttpStatus.INTERNAL_SERVER_ERROR;
-    }
+    const status: number = exception.getStatus();
 
     response.status(status).json({
-      statusCode: status,
+      statusCode: HttpStatusCode.FAILED,
       timestamp: new Date().toISOString(),
+      message: exception.message,
       path: request.url,
     });
   }

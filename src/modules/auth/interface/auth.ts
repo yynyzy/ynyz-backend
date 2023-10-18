@@ -1,5 +1,7 @@
+import { RESPONSE_STATUS } from 'src/common/constant/constant';
+
 export type JWT_Certificate_Response = {
-  status: 'success' | 'fail';
+  status: RESPONSE_STATUS;
   token?: string;
 };
 
