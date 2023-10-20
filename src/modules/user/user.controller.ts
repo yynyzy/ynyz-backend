@@ -108,13 +108,6 @@ export class UserController {
           if (certificateData.status === RESPONSE_STATUS.SUCCESS) {
             this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
             this.Register_And_Login_Res.token = certificateData.token;
-            this.Register_And_Login_Res.user = {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              phone: user.phone,
-              avatar: user.avatar,
-            };
           } else {
             this.Register_And_Login_Res.message =
               ExceptionConstant.FAILED_LOGIN;
@@ -134,14 +127,25 @@ export class UserController {
   }
 
   @Get('search')
-  async findByUsername(
-    @Request() req,
-    @Query('username') username: string,
-  ): Promise<User> {
+  async findByUsername(@Query('username') username: string): Promise<User> {
     try {
       return await this.userService.findByUsername(username);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Post('signOut')
+  // async signOut(@Request() req): Promise<boolean> {
+  async signOut(@Request() req) {
+    const user = req.user;
+    console.log('hahaaaa');
+
+    console.log(user);
+    // try {
+    //   return await this.userService.signOut(user.id);
+    // } catch (error) {
+    //   throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    // }
   }
 }

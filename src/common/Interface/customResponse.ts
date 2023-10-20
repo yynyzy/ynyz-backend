@@ -1,3 +1,4 @@
-export class CustomResponse<T> {
-  constructor(public statusCode: string, public data: T) {}
-}
+export type CustomResponse<T> = {
+  statusCode: string;
+  data: T;
+};

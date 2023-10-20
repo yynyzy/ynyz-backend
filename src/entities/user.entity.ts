@@ -35,5 +35,5 @@ export class User extends Model<User> {
   avatar: string;
 
   @Column
-  isDeleted: boolean;
+  deleted: number;
 }

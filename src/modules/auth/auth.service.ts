@@ -1,7 +1,7 @@
 import { User } from 'src/entities/user.entity';
 import { Crypto } from '../../common/utils/index';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   JWT_Certificate_Response,
   validate_User_Password_Params,
@@ -28,8 +28,8 @@ export class AuthService {
       if (!token) return false;
       const id = this.jwtService.verify(token.replace('Bearer ', ''));
       return id;
-    } catch (e) {
-      return false;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -51,7 +51,7 @@ export class AuthService {
       this.jwt_certificate_res.status = RESPONSE_STATUS.SUCCESS;
       this.jwt_certificate_res.token = token;
     } catch (error) {
-      console.error(error);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
     return this.jwt_certificate_res;
   }
@@ -61,10 +61,14 @@ export class AuthService {
    * @param validate_User_Password_Params
    */
   async validateJWTId(id: number): Promise<User> {
-    const user = await this.userModel.findOne({
-      where: { id },
-    });
-    return user;
+    try {
+      const user = await this.userModel.findOne({
+        where: { id },
+      });
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
@@ -72,10 +76,14 @@ export class AuthService {
    * @param validate_User_Password_Params
    */
   async validateUsername(username: string): Promise<User> {
-    const user = await this.userModel.findOne({
-      where: { username },
-    });
-    return user;
+    try {
+      const user = await this.userModel.findOne({
+        where: { username },
+      });
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
