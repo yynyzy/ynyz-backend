@@ -4,9 +4,11 @@ import configuration from './config/configuration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './core/middleWares/logger.middleware';
-import { DatabaseModule } from './entities/index.module';
+import { DatabaseModule } from './modules/db/db.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { ResponseInterceptor } from './core/Interceptor/responseInterceptor';
 
 @Module({
   imports: [
@@ -16,11 +18,19 @@ import { AuthModule } from './modules/auth/auth.module';
       load: [configuration],
     }),
     DatabaseModule,
+    RedisModule,
     AuthModule,
     UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // 使用统一响应拦截器
+    {
+      provide: ResponseInterceptor,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

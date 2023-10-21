@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from 'src/entities/user.entity';
 import { IRegister_Body } from './interface/user';
@@ -7,18 +7,26 @@ import { IRegister_Body } from './interface/user';
 export class UserService {
   constructor(
     @InjectModel(User)
-    private userModel: typeof User,
+    private readonly userModel: typeof User,
   ) {}
 
   async register(registerData: IRegister_Body): Promise<User> {
-    const user = await this.userModel.create(registerData);
-    return user;
+    try {
+      const user = await this.userModel.create(registerData);
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findByUsername(username: string): Promise<User> {
-    const user = await this.userModel.findOne({
-      where: { username },
-    });
-    return user;
+    try {
+      const user = await this.userModel.findOne({
+        where: { username, deleted: 0 },
+      });
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

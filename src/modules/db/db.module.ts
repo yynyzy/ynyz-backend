@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from './user.entity';
+import { ConfigService } from '@nestjs/config';
+import { User } from '../../entities/user.entity';
 /**
  * 默认情况下，Sequelize 使用模型名称的复数形式作为数据库表名称
  */
 @Module({
   imports: [
-    ConfigModule,
     SequelizeModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         dialect: configService.get('database.DB_DIALECT'),

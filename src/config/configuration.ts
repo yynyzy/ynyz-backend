@@ -9,6 +9,11 @@ export const DEV_CONFIG = {
     DB_USERNAME: 'root',
     DB_PASSWORD: 'yyn990902',
   },
+  redis: {
+    HOST: 'localhost',
+    PORT: 6379,
+    PASSWORD: '123456',
+  },
 };
 
 export const PROD_CONFIG = {
@@ -21,6 +26,11 @@ export const PROD_CONFIG = {
     DB_DATABASE: 'yzyn',
     DB_USERNAME: 'root',
     DB_PASSWORD: 'yyn990902',
+  },
+  redis: {
+    HOST: 'localhost',
+    PORT: 6379,
+    PASSWORD: '123456',
   },
 };
 

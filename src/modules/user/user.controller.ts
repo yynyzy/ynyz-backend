@@ -17,19 +17,23 @@ import {
   ILogin_Body,
   IRegisterAndLogin_Response,
   IRegister_Body,
+  SignOut_Response,
 } from './interface/user';
 import { ExceptionConstant } from './constant/exceptionConstant';
 import { RESPONSE_STATUS } from 'src/common/constant/constant';
+import { RedisService } from '../redis/redis.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly redisService: RedisService,
   ) {}
 
   // 注册登陆接口返回值
   private Register_And_Login_Res: IRegisterAndLogin_Response;
+  private SignOut_Res: SignOut_Response;
 
   /**
    * @用户注册接口
@@ -56,10 +60,11 @@ export class UserController {
           try {
             const user: User = await this.userService.register(registerData);
             if (user) {
-              const authResult = await this.authService.certificate(user);
-              if (authResult.status === RESPONSE_STATUS.SUCCESS) {
+              const result = await this.authService.certificate(user);
+              if (result.status === RESPONSE_STATUS.SUCCESS) {
+                // 将 token 存入到 redis 中
                 this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
-                this.Register_And_Login_Res.token = authResult.token;
+                this.Register_And_Login_Res.token = result.token;
               } else {
                 this.Register_And_Login_Res.message =
                   ExceptionConstant.FAILED_REGISTER;
@@ -135,17 +140,17 @@ export class UserController {
     }
   }
 
-  @Post('signOut')
-  // async signOut(@Request() req): Promise<boolean> {
-  async signOut(@Request() req) {
+  @Post('logout')
+  async logout(@Request() req): Promise<SignOut_Response> {
     const user = req.user;
-    console.log('hahaaaa');
-
-    console.log(user);
-    // try {
-    //   return await this.userService.signOut(user.id);
-    // } catch (error) {
-    //   throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    // }
+    try {
+      const a = await this.redisService.delValue(user.token);
+      this.SignOut_Res.status = RESPONSE_STATUS.SUCCESS;
+      console.log('a', a);
+    } catch (error) {
+      this.SignOut_Res.status = RESPONSE_STATUS.FAIL;
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    return this.SignOut_Res;
   }
 }

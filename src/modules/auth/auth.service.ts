@@ -8,30 +8,18 @@ import {
 } from './interface/auth';
 import { InjectModel } from '@nestjs/sequelize';
 import { RESPONSE_STATUS } from 'src/common/constant/constant';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
     @InjectModel(User)
-    private userModel: typeof User,
+    private readonly userModel: typeof User,
+    private readonly redisService: RedisService,
   ) {}
 
   private jwt_certificate_res: JWT_Certificate_Response;
-
-  /**
-   * @token验证方法
-   * @param token
-   */
-  async verifyToken(token: string): Promise<any> {
-    try {
-      if (!token) return false;
-      const id = this.jwtService.verify(token.replace('Bearer ', ''));
-      return id;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
 
   /**
    * @jwt签证方法
@@ -49,7 +37,13 @@ export class AuthService {
     try {
       const token: string = this.jwtService.sign(payload);
       this.jwt_certificate_res.status = RESPONSE_STATUS.SUCCESS;
-      this.jwt_certificate_res.token = token;
+      const TOKEN = {
+        assess_token: token,
+        refresh_token: '',
+      };
+      this.jwt_certificate_res.token = TOKEN;
+      // 将 token 存入到 redis 中
+      this.redisService.setValue('token', JSON.stringify(TOKEN));
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
