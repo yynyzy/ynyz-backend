@@ -6,9 +6,15 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { HashPasswordMiddleware } from 'src/core/middleWares/hashPassword.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { RedisModule } from '../redis/redis.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User]), AuthModule, RedisModule],
+  imports: [
+    ConfigModule,
+    SequelizeModule.forFeature([User]),
+    AuthModule,
+    RedisModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
 })

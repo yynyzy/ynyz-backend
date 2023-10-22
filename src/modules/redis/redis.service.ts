@@ -1,20 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RedisClientType } from 'redis';
+import { RedisClientType, SetOptions } from 'redis';
 
 @Injectable()
 export class RedisService {
   @Inject('REDIS_CLIENT')
   private redisClient: RedisClientType;
 
-  async setValue(key: string, value: string) {
-    return await this.redisClient.set(key, value);
+  async set(key: string, value: any, ttl?: number) {
+    return await this.redisClient.set(key, value, ttl as SetOptions);
   }
-
-  async getValue(key: string) {
+  async get(key: string) {
     return await this.redisClient.get(key);
   }
-
-  async delValue(key: string) {
+  async del(key: string) {
     return await this.redisClient.del(key);
   }
 }

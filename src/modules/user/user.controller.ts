@@ -15,8 +15,9 @@ import { AuthService } from '../auth/auth.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import {
   ILogin_Body,
-  IRegisterAndLogin_Response,
   IRegister_Body,
+  IRegisterAndLogin_Response,
+  Search_User_Response,
   SignOut_Response,
 } from './interface/user';
 import { ExceptionConstant } from './constant/exceptionConstant';
@@ -34,6 +35,7 @@ export class UserController {
   // 注册登陆接口返回值
   private Register_And_Login_Res: IRegisterAndLogin_Response;
   private SignOut_Res: SignOut_Response;
+  private Search_User_Res: Search_User_Response;
 
   /**
    * @用户注册接口
@@ -107,9 +109,8 @@ export class UserController {
             hashedPassword: user.password,
             salt: user.salt,
           });
-        // const authResult = await this.authService.verifyToken()
         if (isUserPasswordCorrect) {
-          const certificateData = this.authService.certificate(user);
+          const certificateData = await this.authService.certificate(user);
           if (certificateData.status === RESPONSE_STATUS.SUCCESS) {
             this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
             this.Register_And_Login_Res.token = certificateData.token;
@@ -131,26 +132,46 @@ export class UserController {
     return this.Register_And_Login_Res;
   }
 
-  @Get('search')
-  async findByUsername(@Query('username') username: string): Promise<User> {
-    try {
-      return await this.userService.findByUsername(username);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
+  /**
+   * @用户登出接口
+   */
   @Post('logout')
   async logout(@Request() req): Promise<SignOut_Response> {
-    const user = req.user;
+    this.SignOut_Res = {
+      status: RESPONSE_STATUS.FAIL,
+    };
     try {
-      const a = await this.redisService.delValue(user.token);
+      await this.redisService.del(`token_${req.user.id}`);
       this.SignOut_Res.status = RESPONSE_STATUS.SUCCESS;
-      console.log('a', a);
     } catch (error) {
-      this.SignOut_Res.status = RESPONSE_STATUS.FAIL;
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
     return this.SignOut_Res;
+  }
+
+  /**
+   * @根据用户名获取用户接口
+   * @param String username
+   */
+  @Get('search')
+  async findByUsername(
+    @Query('username') username: string,
+  ): Promise<Search_User_Response> {
+    this.Search_User_Res = {
+      status: RESPONSE_STATUS.FAIL,
+    };
+
+    try {
+      const user = await this.userService.findByUsername(username);
+      this.Search_User_Res.status = RESPONSE_STATUS.SUCCESS;
+      this.Search_User_Res.user = {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    return this.Search_User_Res;
   }
 }
