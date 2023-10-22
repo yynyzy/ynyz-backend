@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service';
 import type { Request } from 'express';
+import { AuthConstant } from './constant/auth.constant';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,19 +22,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(req: Request, payload: any) {
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    const user = { id: payload.id, username: payload.username };
-    const cacheToken = await this.redisService.get(`token_${user.id}`);
-    if (token !== cacheToken) {
-      throw new UnauthorizedException('token 不正确');
+    const { id } = payload;
+    // 与 reids 中的 token 比对
+    const cacheToken = await this.redisService.get(`token_${id}`);
+    if (!cacheToken) {
+      throw new UnauthorizedException(AuthConstant.EXPIRED_TOKEN);
     }
-    if (!cacheToken) throw new UnauthorizedException('token 已过期');
-    // if (!user) throw new UnauthorizedException('token 验证失败');
+    if (token !== cacheToken) {
+      throw new UnauthorizedException(AuthConstant.ERROR_TOKEN);
+    }
+
+    // 重置 token 在 redis 中的缓存时间
     await this.redisService.set(
-      `token_${user.id}`,
+      `token_${id}`,
       token,
       this.configService.get('JWT_EXPIRES_IN'),
     );
 
-    return user;
+    return { id: payload.id, username: payload.username };
   }
 }

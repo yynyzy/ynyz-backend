@@ -12,7 +12,7 @@ import { UserService } from './user.service';
 import { User } from 'src/entities/user.entity';
 // import { Role } from 'src/common/decorators/role.decorator';
 import { AuthService } from '../auth/auth.service';
-import { Public } from 'src/common/decorators/public.decorator';
+import { Public } from 'src/common/decorators/common.decorator';
 import {
   ILogin_Body,
   IRegister_Body,
@@ -94,7 +94,9 @@ export class UserController {
    */
   @Public()
   @Post('login')
-  async login(@Body() loginData: ILogin_Body) {
+  async login(
+    @Body() loginData: ILogin_Body,
+  ): Promise<IRegisterAndLogin_Response> {
     this.Register_And_Login_Res = {
       status: RESPONSE_STATUS.FAIL,
     };
