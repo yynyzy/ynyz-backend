@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { RESPONSE_STATUS } from 'src/common/constant/constant';
 import { RedisService } from '../redis/redis.service';
 import { ConfigService } from '@nestjs/config';
+import { IUser } from 'src/common/Interface/entityMappingInterface';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,7 @@ export class AuthService {
    * @jwt签证方法
    * @param user
    */
-  async certificate(user: User): Promise<JWT_Certificate_Response> {
+  async certificate(user: User | IUser): Promise<JWT_Certificate_Response> {
     this.jwt_certificate_res = {
       status: RESPONSE_STATUS.FAIL,
     };

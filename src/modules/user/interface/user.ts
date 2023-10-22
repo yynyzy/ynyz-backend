@@ -1,4 +1,5 @@
 import { BaseResponse } from 'src/common/Interface/commonResponse';
+import { IUser } from 'src/common/Interface/entityMappingInterface';
 import { TOKEN } from 'src/modules/auth/interface/auth';
 
 export interface IRegister_Body {
@@ -16,14 +17,8 @@ export interface IRegisterAndLogin_Response extends BaseResponse {
   token?: TOKEN;
 }
 
-export type SignOut_Response = BaseResponse;
+export type ISignOut_Response = BaseResponse;
 
-type Search_User = {
-  id: number;
-  username: string;
-  avatar: string;
-};
-
-export interface Search_User_Response extends BaseResponse {
-  user?: Search_User;
+export interface ISearch_User_Response extends BaseResponse {
+  user?: IUser;
 }

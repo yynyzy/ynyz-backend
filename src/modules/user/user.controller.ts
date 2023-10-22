@@ -17,12 +17,13 @@ import {
   ILogin_Body,
   IRegister_Body,
   IRegisterAndLogin_Response,
-  Search_User_Response,
-  SignOut_Response,
+  ISearch_User_Response,
+  ISignOut_Response,
 } from './interface/user';
 import { ExceptionConstant } from './constant/exceptionConstant';
 import { RESPONSE_STATUS } from 'src/common/constant/constant';
 import { RedisService } from '../redis/redis.service';
+import { IUser } from 'src/common/Interface/entityMappingInterface';
 
 @Controller('user')
 export class UserController {
@@ -34,8 +35,8 @@ export class UserController {
 
   // 注册登陆接口返回值
   private Register_And_Login_Res: IRegisterAndLogin_Response;
-  private SignOut_Res: SignOut_Response;
-  private Search_User_Res: Search_User_Response;
+  private SignOut_Res: ISignOut_Response;
+  private Search_User_Res: ISearch_User_Response;
 
   /**
    * @用户注册接口
@@ -51,10 +52,12 @@ export class UserController {
     };
     if (registerData.username) {
       try {
-        const user: User = await this.userService.findByUsername(
+        // const user = (await this.userService.findByUsername(
+        //   registerData.username,
+        // )) as IUser;
+        const user: IUser = await this.userService.findByUsername(
           registerData.username,
         );
-
         if (user) {
           this.Register_And_Login_Res.message =
             ExceptionConstant.USER_ALREADY_EXISTS;
@@ -101,7 +104,7 @@ export class UserController {
       status: RESPONSE_STATUS.FAIL,
     };
     try {
-      const user: User = await this.userService.findByUsername(
+      const user: User = await this.userService.unSecurityFindByUsername(
         loginData.username,
       );
       if (user) {
@@ -138,7 +141,7 @@ export class UserController {
    * @用户登出接口
    */
   @Post('logout')
-  async logout(@Request() req): Promise<SignOut_Response> {
+  async logout(@Request() req): Promise<ISignOut_Response> {
     this.SignOut_Res = {
       status: RESPONSE_STATUS.FAIL,
     };
@@ -158,13 +161,13 @@ export class UserController {
   @Get('search')
   async findByUsername(
     @Query('username') username: string,
-  ): Promise<Search_User_Response> {
+  ): Promise<ISearch_User_Response> {
     this.Search_User_Res = {
       status: RESPONSE_STATUS.FAIL,
     };
 
     try {
-      const user = await this.userService.findByUsername(username);
+      const user: IUser = await this.userService.findByUsername(username);
       this.Search_User_Res.status = RESPONSE_STATUS.SUCCESS;
       this.Search_User_Res.user = {
         id: user.id,
