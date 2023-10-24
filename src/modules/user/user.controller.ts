@@ -51,39 +51,31 @@ export class UserController {
       status: RESPONSE_STATUS.FAIL,
     };
     if (registerData.username) {
-      try {
-        // const user = (await this.userService.findByUsername(
-        //   registerData.username,
-        // )) as IUser;
-        const user: IUser = await this.userService.findByUsername(
-          registerData.username,
-        );
+      // const user = (await this.userService.findByUsername(
+      //   registerData.username,
+      // )) as IUser;
+      const user: IUser = await this.userService.findByUsername(
+        registerData.username,
+      );
+      if (user) {
+        this.Register_And_Login_Res.message =
+          ExceptionConstant.USER_ALREADY_EXISTS;
+      } else {
+        const user: User = await this.userService.register(registerData);
         if (user) {
-          this.Register_And_Login_Res.message =
-            ExceptionConstant.USER_ALREADY_EXISTS;
-        } else {
-          try {
-            const user: User = await this.userService.register(registerData);
-            if (user) {
-              const result = await this.authService.certificate(user);
-              if (result.status === RESPONSE_STATUS.SUCCESS) {
-                // 将 token 存入到 redis 中
-                this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
-                this.Register_And_Login_Res.token = result.token;
-              } else {
-                this.Register_And_Login_Res.message =
-                  ExceptionConstant.FAILED_REGISTER;
-              }
-            } else {
-              this.Register_And_Login_Res.message =
-                ExceptionConstant.FAILED_REGISTER;
-            }
-          } catch (error) {
-            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+          const result = await this.authService.certificate(user);
+          if (result.status === RESPONSE_STATUS.SUCCESS) {
+            // 将 token 存入到 redis 中
+            this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
+            this.Register_And_Login_Res.token = result.token;
+          } else {
+            this.Register_And_Login_Res.message =
+              ExceptionConstant.FAILED_REGISTER;
           }
+        } else {
+          this.Register_And_Login_Res.message =
+            ExceptionConstant.FAILED_REGISTER;
         }
-      } catch (error) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
     } else {
       this.Register_And_Login_Res.message = ExceptionConstant.ERROR_PARAMS;
@@ -103,36 +95,30 @@ export class UserController {
     this.Register_And_Login_Res = {
       status: RESPONSE_STATUS.FAIL,
     };
-    try {
-      const user: User = await this.userService.unSecurityFindByUsername(
-        loginData.username,
-      );
-      if (user) {
-        const isUserPasswordCorrect: boolean =
-          this.authService.validateUserPassword({
-            password: loginData.password,
-            hashedPassword: user.password,
-            salt: user.salt,
-          });
-        if (isUserPasswordCorrect) {
-          const certificateData = await this.authService.certificate(user);
-          if (certificateData.status === RESPONSE_STATUS.SUCCESS) {
-            this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
-            this.Register_And_Login_Res.token = certificateData.token;
-          } else {
-            this.Register_And_Login_Res.message =
-              ExceptionConstant.FAILED_LOGIN;
-          }
+    const user: User = await this.userService.unSecurityFindByUsername(
+      loginData.username,
+    );
+    if (user) {
+      const isUserPasswordCorrect: boolean =
+        this.authService.validateUserPassword({
+          password: loginData.password,
+          hashedPassword: user.password,
+          salt: user.salt,
+        });
+      if (isUserPasswordCorrect) {
+        const certificateData = await this.authService.certificate(user);
+        if (certificateData.status === RESPONSE_STATUS.SUCCESS) {
+          this.Register_And_Login_Res.status = RESPONSE_STATUS.SUCCESS;
+          this.Register_And_Login_Res.token = certificateData.token;
         } else {
-          this.Register_And_Login_Res.message =
-            ExceptionConstant.INCORRECT_PASSWORD;
+          this.Register_And_Login_Res.message = ExceptionConstant.FAILED_LOGIN;
         }
       } else {
         this.Register_And_Login_Res.message =
-          ExceptionConstant.NO_USERNAME_ROLE;
+          ExceptionConstant.INCORRECT_PASSWORD;
       }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    } else {
+      this.Register_And_Login_Res.message = ExceptionConstant.NO_USERNAME_ROLE;
     }
     return this.Register_And_Login_Res;
   }
@@ -166,17 +152,13 @@ export class UserController {
       status: RESPONSE_STATUS.FAIL,
     };
 
-    try {
-      const user: IUser = await this.userService.findByUsername(username);
-      this.Search_User_Res.status = RESPONSE_STATUS.SUCCESS;
-      this.Search_User_Res.user = {
-        id: user.id,
-        username: user.username,
-        avatar: user.avatar,
-      };
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    const user: IUser = await this.userService.findByUsername(username);
+    this.Search_User_Res.status = RESPONSE_STATUS.SUCCESS;
+    this.Search_User_Res.user = {
+      id: user.id,
+      username: user.username,
+      avatar: user.avatar,
+    };
     return this.Search_User_Res;
   }
 }
